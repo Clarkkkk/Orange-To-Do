@@ -1,0 +1,212 @@
+/* body styling and constants */
+
+body {
+    font-size: 18px;
+    padding: 2rem;
+    background-color: #f8f8f8;
+    --tick-width: 0.3rem;
+    --tick-height: 0.6rem;
+    --tick-top: -4px;
+    --tick-left: 5px;
+    --sqrt-two: 1.4142;
+}
+
+#container {
+    max-width: 500px;
+    margin: 0 auto;
+    min-height: 5rem;
+    background-color: #fff;
+    padding: 2.5rem;
+    box-shadow: 0px 0px 5px #aaa;
+    border-radius: 5px;
+    position: relative;
+}
+
+/* focus style except for text area */
+
+:focus:not(.text) {
+    outline: 1px solid orange;
+    box-shadow: 0 0 4px orange;
+}
+
+h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    line-height: 1em;
+    margin: 0.5em 0 1em;
+}
+
+p {
+    margin: 2px;
+    padding: 0 0.5rem;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    height: 2.5rem;
+    transition: all 300ms;
+}
+
+p:hover {
+    background-color: #eee;
+}
+
+/* indicate where to put the dragged item when drag upwards or downwards */
+
+p.dragenter-top {
+    box-shadow: 0px -3px 5px -5px orange;
+}
+
+p.dragenter-bottom {
+    box-shadow: 0px 3px 5px -5px orange;
+}
+
+#newItem {
+    text-decoration: none;
+    background-color: transparent;
+    border: 0;
+    outline: none;
+    cursor: pointer;
+    color: orange;
+    font-size: 1rem;
+}
+
+#newItem:active {
+    position: relative;
+    top: 1px;
+    left: 1px;
+    outline: none;
+    box-shadow: none;
+}
+
+.text {
+    display: inline-block;
+    flex: 1 1 auto;
+    margin: 0 0.5rem;
+    padding: 0 0.5rem;
+    font-size: 1rem;
+    line-height: 1.5em;
+    min-width: 10rem;
+    outline: none;
+}
+
+.text:focus {
+    border-top: 1px solid rgba(255, 255, 155, 0);
+    border-bottom: 1px solid #ddd;
+}
+
+/* check box circle */
+
+.checkbox {
+    height: 1rem;
+    width: 1rem;
+    background-color: transparent;
+    border: 2px solid rgba(255, 165, 0, 0.8);
+    border-radius: 50%;
+    outline: none;
+}
+
+/* check box tick, transparent by default */
+
+.checkbox::before {
+    content: '';
+    border-width: 0px 2px 2px 0px; 
+    border-style: solid;
+    border-color: transparent;
+    position: relative;
+    top: var(--tick-top);
+    left: var(--tick-left);
+    width: var(--tick-width);
+    height: var(--tick-height);
+    transform: rotate(45deg);
+    display: inline-block;
+}
+
+@keyframes ticked {
+    0% {
+        width: 0;
+        height: 0;
+        top: calc(var(--tick-top) - var(--tick-height) / 2 + var(--tick-height) / 2 / var(--sqrt-two) - var(--tick-width) / 2 / var(--sqrt-two));
+        left: calc(var(--tick-left) - var(--tick-height) / 2 / var(--sqrt-two) + var(--tick-width) / 2 - var(--tick-width) / 2 / var(--sqrt-two));
+    }
+
+    33% {
+        width: var(--tick-width);
+        height: 0;
+        top: calc(var(--tick-top) - var(--tick-height) / 2 + var(--tick-height) / 2 / var(--sqrt-two));
+        left: calc(var(--tick-left) - var(--tick-height) / 2 / var(--sqrt-two));
+    }
+
+    100% {
+        width: var(--tick-width);
+        height: var(--tick-height);
+    }
+}
+
+/* check box circle when checked */
+
+.checkbox.checked {
+    height: 1rem;
+    width: 1rem;
+    background-color: rgb(255, 165, 0);
+    border: 2px solid rgb(255, 165, 0);
+    border-radius: 50%;
+}
+
+/* check box tick when hovered */
+
+.checkbox:hover::before {
+    border-color: rgb(255, 165, 0);
+}
+
+/* check box tick when checked */
+
+.checkbox.checked::before {
+    border-color: rgb(255, 255, 255);
+}
+
+/* check box tick animation when checked */
+
+.checkbox.checked.animate::before {
+    animation: 500ms ticked;
+}
+
+/* check box when active(clicked) */
+
+.checkbox:active {
+    filter: brightness(90%);
+    outline: none;
+    box-shadow: none;
+}
+
+/* delete button circle */
+
+.del {
+    height: 1rem;
+    width: 1rem;
+    background-color: rgb(240, 25, 25);
+    border-radius: 50%;
+    outline: none;
+}
+
+/* delete button bar */
+
+.del::before {
+    content: '';
+    display: inline-block;
+    width: 0.4rem;
+    border-top: 1px solid white;
+    position: relative;
+    top: -0.5rem;
+    left: 0.3rem;
+}
+
+.del:hover {
+    background-color: rgb(240, 70, 70);
+}
+
+.del:active {
+    background-color: rgb(200, 25, 25);
+    outline: none;
+    box-shadow: none;
+}
+
