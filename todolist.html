@@ -2,29 +2,43 @@
 <html>
 
 <head>
-    <title>Orange To Do</title>
-    <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="todolist.css"> 
-    <script defer src="todolist.js"></script>
+  <title>Orange To Do</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" type="text/css" href="todolist.css">
+  <script type="module" defer src="todolist.js"></script>
 </head>
 
 <body>
-    <main id="container">
-        <header draggable="true">待办事项</header>
-        <button type="button" id="newItem" tabindex="0">+ 新建待办事项</button>
-        <br>
-        <p draggable="true" tabindex="0">
-            <span class="checkbox" tabindex="0"></span>
-            <span contenteditable="true" class="text">一个待办事项</span>
-            <span class="del" tabindex="0"></span>
-        </p>
-        <p draggable="true">
-            <span class="checkbox checked" tabindex="0"></span>
-            <span contenteditable="true" class="text">一个待办事项</span>
-            <span class="del" tabindex="0"></span>
-        </p>
-    </main>
-    <footer>&copy 2020 Made by Clark.</footer>
+  <div id="root">
+
+  </div>
+
+
+
+
+    <!--  <main id="container">
+
+    <header draggable="true">待办事项</header>
+    <button type="button" id="newItem" tabindex="0">+ 新建待办事项</button>
+    <br>
+    <p draggable="true" tabindex="0">
+      <span class="checkbox" tabindex="0"></span>
+      <span contenteditable="true" class="text">一个待办事项</span>
+      <span class="del" tabindex="0"></span>
+    </p>
+    <p draggable="true">
+      <span class="checkbox checked" tabindex="0"></span>
+      <span contenteditable="true" class="text">一个待办事项</span>
+      <span class="del" tabindex="0"></span>
+    </p>
+    <div>{{ a }} {{ b }}</div>
+
+  </main>-->
+  <footer>
+    此页面仅作演示，刷新或关闭页面将丢失所有输入的信息。
+    <br>
+    &copy 2020 Made by Clark.
+  </footer>
 
 </body>
 
