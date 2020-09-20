@@ -13,12 +13,16 @@ document.documentElement.addEventListener('mousemove', (e) => {
 });
 */
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('worker.js')
+      .then((reg) => {
+        console.log('Service worker registered.', reg);
+      });
+  });
+}
+
 const TodoItemCheckbox = {
-  data: function() {
-    return {
-      // checked: false
-    };
-  },
   props: ['checked'],
   model: {
     prop: 'checked',
@@ -41,32 +45,26 @@ const TodoItemCheckbox = {
 };
 
 const TodoItemText = {
-  props: ['value'],
-
+  props: ['value', 'isEditing'],
   template: `
   <input 
     type="text"
     class="text"
-    ref="input"
     :value="value"
+    @change="$emit('input', $event.target.value)"
+    @focus="$emit('update:isEditing', true)"
+    @blur="$emit('update:isEditing', false)"
   >`,
-
-  methods: {
-    focus() {
-      this.$refs.input.focus();
-    }
-  },
-
   mounted: function() {
-    this.focus();
+    this.$el.focus();
   },
 };
 
 const TodoItemDelete = {
-  props: ['hovering'],
+  props: ['isEditing'],
   template: `
     <span 
-      :class="['del', { 'del-show': hovering }]"
+      :class="['del', { 'del-show': isEditing }]"
       tabindex="0"
       @mousedown.prevent
     ></span>
@@ -74,12 +72,12 @@ const TodoItemDelete = {
 };
 
 const TodoItem = {
-  props: ['code', 'moveCode', 'swapCode'],
+  props: ['code', 'moveCode', 'swapCode', 'isDragging', 'todoData'],
   data: function() {
     return {
       text: '',
       checked: false,
-      hovering: false,
+      isEditing: false,
 
       relativeLeft: 0,
       relativeTop: 0,
@@ -93,9 +91,12 @@ const TodoItem = {
     };
   },
 
-
-  mounted: function() {
-    this.$emit('item-mounted', this);
+  created: function() {
+    const data = this.todoData[this.code];
+    if (data) {
+      this.text = data.text;
+      this.checked = data.checked;
+    }
   },
 
   template: `
@@ -107,18 +108,17 @@ const TodoItem = {
     >
       <div 
       ref="elm"
-      class="box"
+      :class="['box', {'dragging': isDragging}]"
       >
         <todo-item-checkbox v-model="checked"/>
         <todo-item-text 
           ref="todoInput"
           v-model="text"
-          @focus.native="hovering=true"
-          @blur.native="hovering=false"
+          :isEditing.sync="isEditing"
         />
         <todo-item-delete 
           @click.native="$emit('delete-item', code)"
-          :hovering="hovering"
+          :isEditing="isEditing"
         />
       </div>
     </div>
@@ -131,8 +131,23 @@ const TodoItem = {
   },
 
   watch: {
-    hovering: function(newVal) {
-      // console.log(newVal);
+    // watch data changes and emit data-update
+    checked: function(newVal) {
+      this.$emit('data-update', {
+        code: this.code,
+        type: 'checked',
+        data: newVal,
+        timestamp: Date.now()
+      });
+    },
+
+    text: function(newVal) {
+      this.$emit('data-update', {
+        code: this.code,
+        type: 'text',
+        data: newVal,
+        timestamp: Date.now()
+      });
     }
   },
 
@@ -143,8 +158,9 @@ const TodoItem = {
     },
 
     _dragStart(event) {
-      console.log('start');
       this.$emit('update:moveCode', this.code);
+      this.$emit('update:isDragging', true);
+      this.$el.classList.add('moving');
       // hide the default drag image
       const img = document.createElement('img');
       event.dataTransfer.setDragImage(img, 0, 0);
@@ -191,26 +207,28 @@ const TodoItem = {
     _dragOver(event) {
       // preventDefault() must be called
       event.preventDefault();
-      console.log('over');
       this.shadowNode.style.left = (event.clientX - this.relativeLeft) + 'px';
       this.shadowNode.style.top = (event.clientY - this.relativeTop) + 'px';
     },
 
     _dragEnter(event) {
-      console.log('enter');
-      console.log(event);
+      // dragenter will fire on the dragged element itself somehow
+      // need to prevent it
+      if (event.currentTarget.classList.contains('moving')) {
+        return;
+      }
       event.preventDefault();
-      console.log(this.swapCode);
       this.$emit('update:swapCode', this.code);
-      console.log(this.swapCode);
+      this.$emit('swap');
     },
 
     _dragEnd(event) {
-      console.log('end');
       // the handler below is binded to body
       // they are going to influence the next drag operation if not removed
       document.body.removeEventListener('dragend', this.dragEnd);
       document.body.removeEventListener('dragover', this.dragOver);
+      this.$emit('update:isDragging', false);
+      this.$el.classList.remove('moving');
       // remove the shadow node
       // remove its registration in drag tool as well
       this.shadowNode.remove();
@@ -220,77 +238,110 @@ const TodoItem = {
   }
 };
 
-const vm = new Vue({
+new Vue({
   el: '#root',
   data: {
     count: 0,
     codes: [],
-    instances: [],
+    todoData: {},
     moveCode: -1,
     swapCode: -1,
+    isDragging: false
   },
   components: {
     'todo-item': TodoItem
   },
   template: `
   <main id="container">
-  <header>待办事项</header>
-  <button 
-    type="button" 
-    id="newItem" 
-    tabindex="0" 
-    @click="createItem"
-  >
-    新建待办事项
-  </button>
-  <transition-group name="todo-list" class="todo-list">
-  <todo-item 
-    v-for="code in codes"
-    ref="items"
-    :key="code"
-    :code="code"
-    :moveCode.sync="moveCode"
-    :swapCode.sync="swapCode"
-    @item-mounted="itemMounted"
-    @delete-item="deleteItem($event)"
-  />
-  </transition-group>
-  <div id="list-container">
+    <header>待办事项</header>
 
-  </div>
+    <div class="operations">
+      <button 
+      type="button" 
+      id="create-button" 
+      tabindex="0" 
+      @click="createItem"
+      >
+        新建
+      </button>
+    </div>
 
+    <transition-group name="todo-list" class="todo-list">
+      <todo-item 
+        v-for="code in codes"
+        :key="code"
+        :code="code"
+        :todoData="todoData"
+        :moveCode.sync="moveCode"
+        :swapCode.sync="swapCode"
+        :isDragging.sync="isDragging"
+        @delete-item="deleteItem($event)"
+        @data-update="dataUpdate"
+        @swap="swap"
+      />
+    </transition-group>
   </main>
   `,
+
+  created: function() {
+    const codes = localStorage.getItem('codes');
+    const todoData = localStorage.getItem('todoData');
+    if (codes) {
+      this.codes = JSON.parse(codes);
+    }
+    if (todoData) {
+      this.todoData = JSON.parse(todoData);
+    }
+  },
+
   watch: {
-    swapCode: function(newVal) {
-      console.log('swapCode');
-      if (newVal > 0) {
-        const first = this.codes.indexOf(this.moveCode);
-        const second = this.codes.indexOf(this.swapCode);
-        // swap the code
-        const temp = this.codes[first];
-        this.codes[first] = this.codes[second];
-        this.codes[second] = temp;
-        // swap the instance
-      }
+    // save changes in local storage
+    codes: function(newVal) {
+      localStorage.setItem('codes', JSON.stringify(newVal));
+    },
+
+    todoData: {
+      handler: function(newVal) {
+        localStorage.setItem('todoData', JSON.stringify(newVal));
+      },
+      deep: true,
     }
   },
 
   methods: {
-    createItem() {
+    createItem(event) {
       this.count++;
       this.codes.push(this.count);
+      const data = {
+        checked: false,
+        text: '',
+        date: Date.now(),
+      };
+      this.$set(this.todoData, this.count, data);
       event.target.blur();
     },
 
-    deleteItem(event) {
-      const i = this.codes.indexOf(event);
+    deleteItem(code) {
+      const i = this.codes.indexOf(code);
       this.codes.splice(i, 1);
-      this.instances.splice(i, 1);
+      this.$delete(this.todoData, code);
     },
 
-    itemMounted(instance) {
-      this.instances.push(instance);
+    swap() {
+      const first = this.codes.indexOf(this.moveCode);
+      const second = this.codes.indexOf(this.swapCode);
+      // swap the code
+      // use $set() in order to watch the change of 'codes'
+      const temp = this.codes[first];
+      Vue.set(this.codes, first, this.codes[second]);
+      Vue.set(this.codes, second, temp);
+    },
+
+    dataUpdate(dataObj) {
+      // handle all the data update from child components here
+      const {code, type, data, timestamp} = dataObj;
+      this.todoData[code][type] = data;
+      this.todoData[code][timestamp] = timestamp;
     }
   },
 });
