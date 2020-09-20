@@ -26,9 +26,9 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/",
+  "start_url": "./",
   "background_color": "#f8f8f8",
   "display": "standalone",
-  "scope": "/",
+  "scope": "./",
   "theme_color": "#FFA500"
 }
