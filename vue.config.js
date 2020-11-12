@@ -1,8 +1,5 @@
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-function resolve(dir) {
-  return path.join(__dirname, dir);
-}
 
 module.exports = {
   lintOnSave: false,
@@ -14,47 +11,9 @@ module.exports = {
       clientsClaim: true,
       navigateFallback: '/index.html',
       exclude: [/\.(?:png|jpg|jpeg|map)$/], // 在预缓存中排除图片和sourceMap
-      // 定义运行时缓存
-      runtimeCaching: [
-        {
-          // To match cross-origin requests, use a RegExp that matches
-          // the start of the origin:
-          urlPattern: new RegExp(/^https?:\/\/.*126\.net/),
-          handler: 'staleWhileRevalidate',
-          options: {
-            // Configure which responses are considered cacheable.
-            cacheableResponse: {
-              statuses: [200]
-            }
-          }
-        },
-        {
-          // To match cross-origin requests, use a RegExp that matches
-          // the start of the origin:
-          urlPattern: new RegExp('^https://clarkkkk.xyz'),
-          handler: 'staleWhileRevalidate',
-          options: {
-            // Configure which responses are considered cacheable.
-            cacheableResponse: {
-              statuses: [200]
-            }
-          }
-        },
-        {
-          urlPattern: new RegExp('^https://cdn'),
-          handler: 'NetworkFirst',
-          options: {
-            networkTimeoutSeconds: 20,
-            cacheName: 'cdn-cache',
-            cacheableResponse: {
-              statuses: [200]
-            }
-          }
-        }
-      ]
     },
-    name: 'neteasemusic',
-    themeColor: '#e91a3d',
+    name: 'orange-to-do',
+    themeColor: '#FFA500',
     appleMobileWebAppCapable: 'yes',
     manifestPath: 'public/manifest.json',
     iconPaths: {
@@ -78,5 +37,5 @@ module.exports = {
       ])
     ]
   },
-  publicPath: process.env.NODE_ENV === 'production' ? '/Netease-Music-Page/' : '/',
+  publicPath: process.env.NODE_ENV === 'production' ? '/Orange-To-Do-Page/' : '/',
 };
