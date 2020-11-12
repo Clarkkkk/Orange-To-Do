@@ -1,0 +1,34 @@
+{
+  "short_name": "Orange To do",
+  "name": "Orange To do",
+  "description": "A simple to-do list app",
+  "icons": [
+    {
+      "src": "../img/icons/favicon-16x16.png",
+      "type": "image/png",
+      "sizes": "16x16"
+    },
+    {
+      "src": "../img/icons/favicon-32x32.png",
+      "type": "image/png",
+      "sizes": "32x32"
+    },
+    {
+      "src": "../img/icons/android-chrome-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "../img/icons/android-chrome-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/Orange-To-Do-Page/index.html",
+  "background_color": "#f8f8f8",
+  "display": "standalone",
+  "scope": "/Orange-To-Do-Page/",
+  "theme_color": "#FFA500"
+}
